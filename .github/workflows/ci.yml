@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Run tests
+        run: |
+          cargo test --verbose
+          echo '### Tests completed ✅' >> $GITHUB_STEP_SUMMARY
+      - name: Check formatting
+        run: |
+          cargo fmt --all -- --check
+          echo '### Format check completed ✅' >> $GITHUB_STEP_SUMMARY
+      - name: Run clippy
+        run: |
+          cargo clippy -- -D warnings
+          echo '### Clippy check completed ✅' >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        run: |
+          cargo build --verbose
+          echo '### Build completed 🎉' >> $GITHUB_STEP_SUMMARY

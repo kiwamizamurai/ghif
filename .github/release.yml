@@ -1,0 +1,43 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: ⚠ BREAKING CHANGES (MAJOR)
+      labels:
+        - breaking
+        - major
+    - title: ✨ Features (MINOR)
+      labels:
+        - feat
+        - minor
+    - title: 🐛 Bug Fixes (PATCH)
+      labels:
+        - fix
+        - patch
+    - title: ⚡ Performance Improvements (PATCH)
+      labels:
+        - perf
+        - patch
+    - title: 💡 Refactor (PATCH)
+      labels:
+        - refactor
+        - patch
+    - title: 📝 Documentation
+      labels:
+        - docs
+    - title: ⛔ Deprecations (MINOR)
+      labels:
+        - deprecated
+        - minor
+    - title: 🗑️ Removals (MAJOR)
+      labels:
+        - removed
+        - major
+    - title: 🔒 Security (PATCH)
+      labels:
+        - security
+        - patch
+    - title: Other Changes
+      labels:
+        - "*"

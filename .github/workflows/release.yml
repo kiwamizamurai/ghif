@@ -1,0 +1,126 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          generate_release_notes: true
+
+  build-release:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            rust_target: x86_64-apple-darwin
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            rust_target: aarch64-apple-darwin
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            rust_target: x86_64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            rust_target: aarch64-unknown-linux-gnu
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            rust_target: x86_64-pc-windows-msvc
+            extension: .exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.rust_target }}
+          override: true
+      - name: Install cross-compilation dependencies
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{ matrix.rust_target }}
+        env:
+          # for linux build
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          CC_aarch64_unknown_linux_gnu: aarch64-linux-gnu-gcc
+          CXX_aarch64_unknown_linux_gnu: aarch64-linux-gnu-g++
+      - name: Prepare asset for upload
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            mv target/${{ matrix.rust_target }}/release/ghif.exe target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}.exe
+          else
+            mv target/${{ matrix.rust_target }}/release/ghif target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}
+          fi
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            gh release upload ${GITHUB_REF#refs/tags/} target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}.exe
+          else
+            gh release upload ${GITHUB_REF#refs/tags/} target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}
+          fi
+
+  update-changelog:
+    needs: [create-release, build-release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+      - name: Update CHANGELOG.md
+        run: |
+          # Get the date
+          DATE=$(date +%Y-%m-%d)
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          
+          # Generate release notes using GitHub CLI
+          NOTES=$(gh release view $VERSION --json body --jq .body || echo '')
+          
+          # Prepare the new entry
+          ENTRY="## [$VERSION] - $DATE\n\n$NOTES\n\n"
+          
+          # Update CHANGELOG.md
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n" > CHANGELOG.md
+          fi
+          echo -e "$ENTRY$(cat CHANGELOG.md)" > CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Commit and push CHANGELOG.md
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "docs: update changelog for ${{ steps.get_version.outputs.VERSION }}"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
