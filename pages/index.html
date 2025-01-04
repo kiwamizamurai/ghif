@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ghif - GitHub Issue Formatter for LLM Integration</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        header {
+            background-color: #24292e;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .description {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .features {
+            margin-top: 3rem;
+        }
+        .feature {
+            margin-bottom: 3rem;
+            background: #f6f8fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        .feature h2, .feature h3 {
+            color: #0366d6;
+            margin-top: 0;
+        }
+        .cta {
+            margin-top: 3rem;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: #2ea44f;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #2c974b;
+        }
+        code {
+            background-color: #ffffff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+        }
+        pre {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .note {
+            background-color: #fff8c5;
+            border-left: 4px solid #e36209;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .demo-image {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ghif</h1>
+            <div class="description">A CLI tool that bridges GitHub issues and LLM-powered development by converting issues into structured files, enabling seamless integration with AI development workflows.</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="demo-image">
+            <img src="https://raw.githubusercontent.com/kiwamizamurai/ghif/refs/heads/main/demo.gif" alt="Demo of ghif in action">
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h2>Why ghif?</h2>
+                <div class="grid">
+                    <div>
+                        <h3>🤖 LLM-Ready Format</h3>
+                        <p>Issues are converted to structured formats (Markdown/XML) that are optimized for LLM processing</p>
+                    </div>
+                    <div>
+                        <h3>📚 Context-Rich Development</h3>
+                        <p>Feed your LLM with real project context from issues and discussions</p>
+                    </div>
+                    <div>
+                        <h3>⚡️ Efficient Workflows</h3>
+                        <p>Integrate with your favorite AI tools to analyze issues, generate code, or get development insights</p>
+                    </div>
+                    <div>
+                        <h3>💾 Local Knowledge Base</h3>
+                        <p>Build a searchable archive of project issues for offline access and AI processing</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature">
+                <h2>Installation</h2>
+                <h3>macOS</h3>
+                <p>Using Homebrew:</p>
+                <pre><code>brew tap kiwamizamurai/tap
+brew install ghif</code></pre>
+                <p>Or download the binary directly from <a href="https://github.com/kiwamizamurai/ghif/releases">GitHub Releases</a> and add it to your PATH.</p>
+            </div>
+
+            <div class="feature">
+                <h2>Quick Usage</h2>
+                <pre><code>
+# In your GitHub repository directory
+ghif
+
+# Specify repository
+ghif --repository owner/repo
+
+# Choose output format
+ghif --format markdown  # default
+ghif --format xml
+
+# Fetch specific issues
+ghif --issues 1,2,3</code></pre>
+                
+                <div class="note">
+                    <strong>Note:</strong> A GitHub Personal Access Token is recommended for higher API rate limits.
+                    Set it in your environment:
+                    <pre><code>export GITHUB_TOKEN=$(gh auth token)</code></pre>
+                </div>
+            </div>
+
+            <div class="feature">
+                <h2>Integration with LLM Workflows</h2>
+                <div class="grid">
+                    <div>
+                        <h3>📊 Issue Analysis</h3>
+                        <ul>
+                            <li>Identify patterns and common problems</li>
+                            <li>Get AI-powered issue summaries</li>
+                            <li>Generate task breakdowns</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>💻 Code Generation</h3>
+                        <ul>
+                            <li>Generate relevant code snippets</li>
+                            <li>Get solutions based on similar issues</li>
+                            <li>Auto-generate tests</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>🗄️ Knowledge Management</h3>
+                        <ul>
+                            <li>Build local knowledge base</li>
+                            <li>Enable semantic search</li>
+                            <li>Train custom models</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta">
+            <a href="https://github.com/kiwamizamurai/ghif" class="button">View on GitHub</a>
+        </div>
+    </main>
+</body>
+</html>

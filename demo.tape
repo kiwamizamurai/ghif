@@ -9,32 +9,28 @@ Set Theme "Catppuccin Mocha"
 
 Type "# Let's try ghif - GitHub Issue Fetcher!"
 Enter
-Sleep 500ms
+Sleep 1s
 
 Type "# First, let's fetch all issues from a repository"
 Enter
-Sleep 500ms
+Sleep 1s
 
 Type "ghif -r scalar/scalar"
 Enter
-Sleep 10s
+Sleep 5s
 Ctrl+c
 
 Type "# Now let's check the downloaded issues"
 Enter
-Sleep 500ms
+Sleep 1s
 
-Type "ls -l issues | head -n 5"
+Type "ls issues | head -n 5"
 Enter
-Sleep 2s
+Sleep 1s
 
 Type "# Let's look at one of the issues"
 Enter
-Sleep 500ms
-
-Type "ls issues | grep issue | head -n 3"
-Enter
-Sleep 1s
+Sleep 2s
 
 Type "head -n 10 issues/$(ls issues | grep issue | head -n 1)"
 Enter
@@ -42,7 +38,7 @@ Sleep 3s
 
 Type "# We can also fetch specific issues"
 Enter
-Sleep 500ms
+Sleep 1s
 
 Type "ghif -r scalar/scalar -i 1,2 --format xml"
 Enter
