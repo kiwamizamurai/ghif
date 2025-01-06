@@ -31,6 +31,9 @@ brew tap kiwamizamurai/tap
 brew install ghif
 ```
 
+> [!NOTE]
+> The released binaries are built with Link Time Optimization (LTO) and maximum optimizations enabled for best performance.
+
 Or download the binary directly from [GitHub Releases](https://github.com/kiwamizamurai/ghif/releases) and add it to your PATH.
 
 ## Integration with LLM Workflows

@@ -23,6 +23,9 @@ To create a new token:
 # Build the project
 cargo build
 
+# Build with optimizations (dist profile)
+cargo build --profile dist
+
 # Run with default settings
 cargo run
 
