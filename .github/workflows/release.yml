@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  packages: write # needed for docker publishing
+  id-token: write # needed for keyless signing
 
 jobs:
   create-release:
@@ -22,65 +24,39 @@ jobs:
 
   build-release:
     needs: create-release
-    strategy:
-      matrix:
-        include:
-          - target: x86_64-apple-darwin
-            os: macos-latest
-            rust_target: x86_64-apple-darwin
-          - target: aarch64-apple-darwin
-            os: macos-latest
-            rust_target: aarch64-apple-darwin
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            rust_target: x86_64-unknown-linux-gnu
-          - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
-            rust_target: aarch64-unknown-linux-gnu
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-            rust_target: x86_64-pc-windows-msvc
-            extension: .exe
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for changelog generation
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: ${{ matrix.rust_target }}
           override: true
-      - name: Install cross-compilation dependencies
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-      - uses: actions-rs/cargo@v1
+
+      # Required for cross-compilation
+      - name: Install cargo-zigbuild
+        run: cargo install cargo-zigbuild
+
+      # Required for signing
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      # Required for SBOM
+      - name: Install syft
+        uses: anchore/sbom-action/download-syft@v0.15.1
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
         with:
-          command: build
-          args: --profile dist --target ${{ matrix.rust_target }}
-        env:
-          # for linux build
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-          CC_aarch64_unknown_linux_gnu: aarch64-linux-gnu-gcc
-          CXX_aarch64_unknown_linux_gnu: aarch64-linux-gnu-g++
-      - name: Prepare asset for upload
-        shell: bash
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            mv target/${{ matrix.rust_target }}/release/ghif.exe target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}.exe
-          else
-            mv target/${{ matrix.rust_target }}/release/ghif target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}
-          fi
-      - name: Upload Release Asset
+          distribution: goreleaser
+          version: latest
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            gh release upload ${GITHUB_REF#refs/tags/} target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}.exe
-          else
-            gh release upload ${GITHUB_REF#refs/tags/} target/${{ matrix.rust_target }}/release/ghif-${{ matrix.target }}
-          fi
+          # Required if you're using Homebrew tap
+          # GH_PAT: ${{ secrets.GH_PAT }}
 
   update-changelog:
     needs: [create-release, build-release]
